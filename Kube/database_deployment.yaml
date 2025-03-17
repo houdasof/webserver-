@@ -1,0 +1,71 @@
+
+---
+# ==============================
+# 🔹 DATABASE DEPLOYMENT
+# ==============================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  labels:
+    app: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: postgres:15
+        env:
+        - name: POSTGRES_USER
+          value: "myuser"
+        - name: POSTGRES_PASSWORD
+          value: "mypassword"
+        - name: POSTGRES_DB
+          value: "mydb"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: db-storage
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - myuser
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - myuser
+          initialDelaySeconds: 15
+          periodSeconds: 10
+      volumes:
+      - name: db-storage
+        persistentVolumeClaim:
+          claimName: database-pvc
+
+---
+# ==============================
+# 🔹 PERSISTENT VOLUME CLAIM (POUR DATABASE)
+# ==============================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi  # ✅ 1GB de stockage

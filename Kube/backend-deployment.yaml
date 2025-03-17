@@ -1,0 +1,50 @@
+---
+# ==============================
+# 🔹 BACKEND DEPLOYMENT
+# ==============================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: my-backend:latest  #  LOCAL IMAGE
+        imagePullPolicy: Never  #  Ne pas pull depuis Docker Hub
+        env:
+        - name: DB_USER
+          value: "myuser"
+        - name: DB_PASSWORD
+          value: "mypassword"
+        - name: DB_NAME
+          value: "mydb"
+        - name: DB_HOST
+          value: "database.default.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        ports:
+        - containerPort: 11002
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 11002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 11002
+          initialDelaySeconds: 15
+          periodSeconds: 10

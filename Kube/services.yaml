@@ -1,0 +1,52 @@
+
+---
+# ==============================
+# 🔹 BACKEND SERVICE (EXPOSÉ VIA NODEPORT)
+# ==============================
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 11002
+      targetPort: http
+  type: LoadBalancer
+
+---
+# ==============================
+# 🔹 FRONTEND SERVICE (ACCESSIBLE VIA LOADBALANCER)
+# ==============================
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 11003
+      targetPort: 11003
+  type: LoadBalancer
+
+# ==============================
+# 🔹 DATABASE SERVICE (INTERNE AU CLUSTER)
+# ==============================
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+spec:
+  selector:
+    app: database
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: LoadBalancer
+
+---
